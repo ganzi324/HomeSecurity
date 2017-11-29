@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "538876515131",
+    "firebase_url": "https://homesecurity-a3f0a.firebaseio.com",
+    "project_id": "homesecurity-a3f0a",
+    "storage_bucket": "homesecurity-a3f0a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:538876515131:android:cc1c884ba6bf127f",
+        "android_client_info": {
+          "package_name": "kr.ac.hansung.homesecurity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "538876515131-9cpl49lr992ntvkiqcthpvqlctgpeso3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "kr.ac.hansung.homesecurity",
+            "certificate_hash": "aa737f959a06d005f8f413022b21187f18361960"
+          }
+        },
+        {
+          "client_id": "538876515131-fp7b9f72vujffl8afdp2h2gi6nnbcnkr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZTFXibfEe0tU38apIdu_xZ2RPh0g-F0I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "538876515131-fp7b9f72vujffl8afdp2h2gi6nnbcnkr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
