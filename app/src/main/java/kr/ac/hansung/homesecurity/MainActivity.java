@@ -1,113 +1,121 @@
 package kr.ac.hansung.homesecurity;
 
-import android.os.AsyncTask;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-
-import com.google.firebase.iid.FirebaseInstanceId;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import android.widget.ImageButton;
 /**
  * Created by sky on 2017-11-21.
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    TextView txt_result;
+    private final String TAG = MainActivity.class.getSimpleName();
+
+    public static final int REQUEST_EXTERNAL_STORAGE = 1001;
+
+    ImageButton b_level;
+    ImageButton b_record;
+    ImageButton b_live;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
-        TextView txt_idToken = findViewById(R.id.id_token);
-        txt_idToken.setText(refreshedToken);
+        b_level = findViewById(R.id.level);
+        b_record = findViewById(R.id.record);
+        b_live = findViewById(R.id.live);
 
-        txt_result = findViewById(R.id.result);
+        b_level.setOnClickListener(this);
+        b_record.setOnClickListener(this);
+        b_live.setOnClickListener(this);
+        findViewById(R.id.l_level).setOnClickListener(this);
+        findViewById(R.id.l_record).setOnClickListener(this);
+        findViewById(R.id.l_live).setOnClickListener(this);
 
-        Button btn_send = findViewById(R.id.send);
-        btn_send.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new HttpPost().execute(refreshedToken);
-            }
-        });
-
+        requestPermission();
     }
 
-    public class HttpPost extends AsyncTask<String, Void, Void> {
-        HttpURLConnection conn = null;
-
-        @Override
-        public Void doInBackground(String... params) {
-            try {
-                EditText edit_uri = findViewById(R.id.url);
-                String url = "http://" + edit_uri.getText().toString().trim();
-
-                URL obj = new URL(url);
-                conn = (HttpURLConnection) obj.openConnection();
-                conn.setReadTimeout(8000);
-                conn.setConnectTimeout(8000);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.setRequestProperty("Accept-Charset", "UTF-8");
-                conn.setRequestProperty("Content-Type","text/html");
-                conn.setRequestProperty("Context_Type", "application/x-www-form-urlencoded;cahrset=UTF-8");
-
-                String param = "id_token=" + params[0];
-                Log.i("httpPost", "params[0]:" + params[0]);
-
-                OutputStream os = conn.getOutputStream();
-                os.write(param.getBytes("UTF-8"));
-                os.flush();
-                os.close();
-
-                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                    Log.w("httpPost", "connection failed");
-                    return null;
-                }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (conn != null)
-                    conn.disconnect();
-            }
-            return null;
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.l_level || id == R.id.level) {
+            updateBtnUI(0);
+            updateFragment(0);
+        } else if (id == R.id.l_record || id == R.id.record) {
+            updateBtnUI(1);
+            updateFragment(1);
+        } else if (id == R.id.l_live || id == R.id.live) {
+            updateBtnUI(2);
+            updateFragment(2);
         }
+    }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+    public void updateBtnUI(int btnNum) {
+        switch (btnNum) {
+            case 0:
+                b_level.setImageResource(R.drawable.ic_level_on);
+                b_record.setImageResource(R.drawable.ic_record_off);
+                b_live.setImageResource(R.drawable.ic_cam_off);
+                break;
+            case 1:
+                b_level.setImageResource(R.drawable.ic_level_off);
+                b_record.setImageResource(R.drawable.ic_record_on);
+                b_live.setImageResource(R.drawable.ic_cam_off);
+                break;
+            case 2:
+                b_level.setImageResource(R.drawable.ic_level_off);
+                b_record.setImageResource(R.drawable.ic_record_off);
+                b_live.setImageResource(R.drawable.ic_cam_on);
+                break;
+        }
+    }
 
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+    public void updateFragment(int number) {
+        Fragment fragment = null;
+        switch (number) {
+            case 0:
+                fragment = new SecurityFragment();
+                break;
+            case 1:
+                fragment = new RecordsFragment();
+                break;
+            case 2:
+                fragment = new LiveFragment();
+                break;
+        }
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.container, fragment).commit();
+    }
 
-                String line;
-                String page = "";
-                while ((line = reader.readLine()) != null) {
-                    page += line;
-                }
-                txt_result.setText("response:" + page);
-            } catch (IOException e) {
-                txt_result.setText("connection failed");
+    private void requestPermission() {
+        String[] PERMISSIONS_STORAGE = { android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        int permission = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_EXTERNAL_STORAGE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                updateBtnUI(0);
+                updateFragment(0);
+                Log.d(TAG, "permission result:success");
             }
         }
     }
+
 }

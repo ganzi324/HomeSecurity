@@ -60,8 +60,14 @@ public class EmailPasswordActivity extends BaseActivity implements
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            Intent intent = new Intent(EmailPasswordActivity.this, MainActivity.class);
+            intent.putExtra(USER_EMAIL, user.getEmail());
+            startActivity(intent);
+            finish();
+        }
+        updateUI(user);
     }
     // [END on_start_check_user]
 
@@ -120,7 +126,7 @@ public class EmailPasswordActivity extends BaseActivity implements
                                 Intent intent = new Intent(EmailPasswordActivity.this, MainActivity.class);
                                 intent.putExtra(USER_EMAIL, user.getEmail());
                                 startActivity(intent);
-                                finish();;
+                                finish();
                             }
                             updateUI(user);
                         } else {
